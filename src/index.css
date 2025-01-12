@@ -1,0 +1,267 @@
+:root {
+  --bg-color: #f4f8fc;
+  --text-color: #00305e; /* Lufthansa Blue */
+  --input-bg: #ffffff;
+  --input-border: #0056b3; /* Lufthansa Dark Blue */
+  --button-bg: #ffcc00; /* Lufthansa Yellow */
+  --button-hover-bg: #e6b800;
+  --table-border: #d1e0eb;
+  --shadow-color: rgba(0, 48, 94, 0.2);
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  display: flex;
+  gap: 30px;
+  margin: 50px auto;
+  padding: 30px;
+  max-width: 90%;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+
+.left-container {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.right-container {
+  flex: 1;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  padding: 20px;
+  height: fit-content;
+  overflow: auto;
+}
+
+.app-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.upload-section,
+.search-section,
+.filters-section {
+  margin-bottom: 20px;
+}
+
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 150px;
+  max-width: 250px;
+  padding-inline: 1rem;
+}
+
+input[type="file"],
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid var(--input-border);
+  border-radius: 5px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus {
+  border-color: var(--button-bg);
+  box-shadow: 0 0 8px var(--button-bg);
+}
+
+.data-table-container {
+  flex: 1;
+}
+
+.table-and-preview{
+  cursor: pointer;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: var(--input-bg);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  cursor: pointer;
+}
+
+.data-table thead {
+  background-color: var(--text-color);
+  color: white;
+  font-weight: bold;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background-color: #f4f8fc;
+}
+
+.data-table tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+  cursor: pointer;
+}
+
+.data-table td,
+.data-table th {
+  padding: 14px;
+  text-align: left;
+  border: 1px solid var(--table-border);
+  font-size: 0.95rem;
+}
+
+.content-preview h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.preview-table th {
+  background-color: var(--text-color);
+  color: white;
+  text-align: left;
+  padding: 12px;
+}
+
+.preview-table td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid var(--table-border);
+}
+
+/* Loading text styling */
+.loading-text {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--text-color);
+  margin-top: 20px;
+}
+
+.clear-filters-button {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: none;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 3rem;
+}
+
+.clear-filters-button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.footer {
+  text-align: center;
+  padding: 15px;
+  background-color: var(--text-color); /* Lufthansa Blue */
+  color: white;
+  font-size: 1rem;
+  margin-top: 20px;
+  border-top: 2px solid var(--button-bg); /* Lufthansa Yellow */
+}
+
+.footer p {
+  margin: 0;
+}
+
+.footer strong {
+  font-weight: bold;
+}
+
+.upload-section {
+  position: relative;
+  margin: 20px 0;
+  padding: 20px;
+  border: 2px dashed var(--input-border);
+  border-radius: 10px;
+  text-align: center;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.upload-section h2 {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+
+.upload-section p {
+  margin: 10px 0 0;
+  font-size: 1rem;
+  color: var(--text-color);
+}
+
+.upload-section.drag-over {
+  background-color: rgba(0, 123, 255, 0.1);
+  border-color: var(--button-bg);
+  color: var(--button-bg);
+}
+
+.file-input {
+  display: block; /* Ensure the file input is visible */
+  margin: 0 auto 15px;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid var(--input-border);
+  border-radius: 5px;
+  outline: none;
+  transition: box-shadow 0.3s, border-color 0.3s;
+  width: 60%; /* Adjust width as needed */
+  box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.file-input:hover {
+  border-color: var(--button-bg);
+}
+
+.file-input:focus {
+  border-color: var(--button-bg);
+  box-shadow: 0 0 8px var(--button-bg);
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--text-color);
+  color: white;
+  text-align: center;
+  padding: 1rem 0;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  font-size: 14px;
+}
