@@ -100,6 +100,7 @@ input:focus {
 
 .data-table {
   width: 100%;
+  height: 100rem;
   border-collapse: collapse;
   margin-top: 10px;
   background-color: var(--input-bg);

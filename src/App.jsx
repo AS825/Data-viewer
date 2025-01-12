@@ -193,13 +193,14 @@ const App = () => {
     <div className="app-container">
       <div className="left-container">
         <h1 className="app-title">Data Viewer</h1>
-
+        {!uploaded && (
         <input
           className="file-input"
           type="file"
           accept=".json, .xlsx, .xls, .csv"
           onChange={(e) => handleFileUpload(e.target.files[0])}
         />
+      )}
         {!uploaded && (
           <div
             className={`upload-section ${dragOver ? "drag-over" : ""}`}
