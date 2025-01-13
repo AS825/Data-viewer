@@ -3,25 +3,44 @@ import DataTable from "react-data-table-component";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import "./App.css";
+import { Bar } from "react-chartjs-2";
+import Chart from "chart.js/auto";
 
 const App = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [secondaryFilteredData, setSecondaryFilteredData] = useState([]);
   const [filters, setFilters] = useState({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [secondarySearch, setSecondarySearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedRowData, setSelectedRowData] = useState(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploaded, setUploaded] = useState(false);
+  const [chartData, setChartData] = useState(null);
+  const [bestMatches, setBestMatches] = useState([]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
+      updateFilteredData();
     }, 500);
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [search, filters]);
 
+  useEffect(() => {
+    updateSecondaryFilteredData();
+  }, [secondarySearch, filteredData]);
+
+  useEffect(() => {
+    if (secondaryFilteredData.length > 0) {
+      generateChartData(secondaryFilteredData); // Recalculate the chart based on filtered data
+    } else {
+      setChartData(null); // Clear the chart if no matches
+    }
+  }, [secondaryFilteredData]);
+  
   const handleFileUpload = (file) => {
     if (!file) return;
 
@@ -100,35 +119,7 @@ const App = () => {
     setFilters(initialFilters);
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setDragOver(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-
-    const file = e.dataTransfer.files[0];
-    handleFileUpload(file);
-  };
-
-  const handleFilterChange = (key, value) => {
-    setFilters({ ...filters, [key]: value });
-  };
-
-  const clearFilters = () => {
-    setFilters(
-      Object.fromEntries(Object.keys(filters).map((key) => [key, ""]))
-    );
-    setSearch("");
-  };
-
-  useEffect(() => {
+  const updateFilteredData = () => {
     let filtered = data;
 
     Object.keys(filters).forEach((key) => {
@@ -140,36 +131,87 @@ const App = () => {
       }
     });
 
-    setFilteredData(
-      filtered.filter((item) =>
-        Object.values(item).some((value) =>
-          value
-            ?.toString()
-            .toLowerCase()
-            .includes(debouncedSearch.toLowerCase())
-        )
+    filtered = filtered.filter((item) =>
+      Object.values(item).some((value) =>
+        value
+          ?.toString()
+          .toLowerCase()
+          .includes(debouncedSearch.toLowerCase())
       )
     );
-  }, [filters, debouncedSearch, data]);
+
+    setFilteredData(filtered);
+  };
+
+  const updateSecondaryFilteredData = () => {
+    if (!secondarySearch) {
+      setSecondaryFilteredData(filteredData); // Default to primary filtered data if no secondary search
+      return;
+    }
+  
+    const filtered = filteredData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(secondarySearch.toLowerCase())
+      )
+    );
+  
+    setSecondaryFilteredData(filtered);
+  };
+  
+
+  const generateChartData = (data) => {
+    const topMatches = data
+      .sort((a, b) => (b.content_matches || 0) - (a.content_matches || 0))
+      .slice(0, 10);
+  
+    const totalScore = topMatches.reduce((sum, item) => sum + (item.content_matches || 0), 0);
+    const chartLabels = topMatches.map((item) => item["contract #"] || "Unknown");
+    const chartValues = topMatches.map((item) =>
+      totalScore > 0 ? ((item.content_matches || 0) / totalScore) * 100 : 0
+    );
+  
+    setChartData({
+      labels: chartLabels,
+      datasets: [
+        {
+          label: "Relevance Percentage",
+          data: chartValues,
+          backgroundColor: "rgba(75,192,192,0.4)",
+          borderColor: "rgba(75,192,192,1)",
+          borderWidth: 1,
+        },
+      ],
+    });
+  
+    setBestMatches(topMatches);
+  };
+  
+  
 
   const highlightSearchText = (text) => {
     if (!debouncedSearch) return text;
 
-    const parts = text
-      .toString()
-      .split(new RegExp(`(${debouncedSearch})`, "gi"));
-    return parts.map((part, index) =>
-      part.toLowerCase() === debouncedSearch.toLowerCase() ? (
-        <span
-          key={index}
-          style={{ backgroundColor: "yellow", fontWeight: "bold" }}
-        >
-          {part}
-        </span>
-      ) : (
-        part
-      )
-    );
+    try {
+      const escapedSearch = debouncedSearch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const parts = text
+        .toString()
+        .split(new RegExp(`(${escapedSearch})`, "gi"));
+      return parts.map((part, index) =>
+        part.toLowerCase() === debouncedSearch.toLowerCase() ? (
+          <span
+            key={index}
+            style={{ backgroundColor: "yellow", fontWeight: "bold" }}
+          >
+            {part}
+          </span>
+        ) : (
+          part
+        )
+      );
+    } catch (e) {
+      console.error("Invalid regular expression", e);
+      return text;
+    }
   };
 
   const columns = data.length
@@ -204,9 +246,14 @@ const App = () => {
         {!uploaded && (
           <div
             className={`upload-section ${dragOver ? "drag-over" : ""}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOver(false);
+              const file = e.dataTransfer.files[0];
+              handleFileUpload(file);
+            }}
           >
             <h2>Upload</h2>
             <p>Drag and drop a file here, or click to upload.</p>
@@ -226,6 +273,20 @@ const App = () => {
               />
             </div>
 
+            {debouncedSearch && (
+              <div className="secondary-search-section">
+                <h2>Refine Results</h2>
+                <input
+  className="search-input"
+  type="text"
+  placeholder="Search within results..."
+  value={secondarySearch}
+  onChange={(e) => setSecondarySearch(e.target.value)}
+/>
+
+              </div>
+            )}
+
             <div className="filters-section">
               <h2>Filters</h2>
               <div className="filters-container">
@@ -237,12 +298,18 @@ const App = () => {
                       type="text"
                       placeholder={`Filter by ${key}`}
                       value={filters[key]}
-                      onChange={(e) => handleFilterChange(key, e.target.value)}
+                      onChange={(e) => setFilters({ ...filters, [key]: e.target.value })}
                     />
                   </div>
                 ))}
               </div>
-              <button className="clear-filters-button" onClick={clearFilters}>
+              <button className="clear-filters-button" onClick={() => {
+                setFilters(
+                  Object.fromEntries(Object.keys(filters).map((key) => [key, ""]))
+                );
+                setSearch("");
+                setSecondarySearch("");
+              }}>
                 Clear Filters
               </button>
             </div>
@@ -259,7 +326,7 @@ const App = () => {
             ) : (
               <DataTable
                 columns={[...columns]}
-                data={filteredData}
+                data={secondaryFilteredData}
                 pagination
                 highlightOnHover
                 responsive
@@ -278,8 +345,50 @@ const App = () => {
             )}
           </div>
         </div>
+        {chartData && chartData.labels.length > 0 && (
+          <div className="chart-container">
+            <h2>Relevance Chart</h2>
+            <Bar data={chartData} />
+          </div>
+        )}
+
+{bestMatches.length > 0 && (
+  <div className="best-matches">
+    <h2>Best Matches</h2>
+    <table className="matches-table">
+      <thead>
+        <tr>
+          <th>Contract #</th>
+          <th>Relevance Score</th>
+          <th>Percentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {bestMatches.map((match, index) => {
+          const totalScore = bestMatches.reduce(
+            (sum, item) => sum + (item.content_matches || 0),
+            0
+          );
+          const percentage = totalScore > 0 
+            ? ((match.content_matches || 0) / totalScore) * 100
+            : 0;
+          return (
+            <tr key={index}>
+              <td>{match["contract #"] || "Unknown"}</td>
+              <td>{match.content_matches || 0}</td>
+              <td>{percentage.toFixed(2)}%</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+)}
+
       </div>
       <div className="right-container">
+        
+
         {selectedRowData && filteredData.length > 0 && (
           <div className="content-preview">
             <h3>Content Preview</h3>

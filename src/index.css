@@ -30,6 +30,7 @@ body {
 
 
 .left-container {
+  width: 50%;
   flex: 2;
   display: flex;
   flex-direction: column;
@@ -265,4 +266,37 @@ footer {
   box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   font-size: 14px;
+}
+
+.best-matches {
+  padding: 10px;
+  background-color: #f9f9f9; /* Optional: Add a subtle background color */
+  border: 1px solid #ddd; /* Optional: Add a border */
+  border-radius: 8px; /* Optional: Add rounded corners */
+}
+
+.matches-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.matches-table th,
+.matches-table td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd; /* Optional: Add a border for cells */
+  font-size: 0.95rem;
+}
+
+.matches-table th {
+  background-color: var(--text-color); /* Lufthansa Blue */
+  color: white;
+}
+
+.matches-table tbody tr:nth-child(even) {
+  background-color: #f4f8fc; /* Optional: Alternate row color */
+}
+
+.matches-table tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.1); /* Optional: Hover effect */
 }
